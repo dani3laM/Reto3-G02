@@ -25,38 +25,89 @@ import model
 import time
 import csv
 import tracemalloc
-
+from DISClib.ADT import list as lt
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
-
+muestra="10-por"
 
 def new_controller():
     """
     Crea una instancia del modelo
     """
     #TODO: Llamar la función del modelo que crea las estructuras de datos
-    pass
-
+    control = model.new_data_structs()
+    return control
 
 # Funciones para la carga de datos
+def cantidad_datos(cant):
+    model.cantidad_datos(cant)
+    
+def printjobtab(csv):
+    jobs=model.printjobtab(csv)
+    return(jobs)
 
-def load_data(control, filename):
+def load_data(control):
     """
     Carga los datos del reto
     """
     # TODO: Realizar la carga de datos
-    pass
+    jobs = loadjobs(control)
+    skills = loadskills(control)
+    multilocations = loadMulti(control)
+    employments = loadEmployment(control)
+    jobs = model.add_infojob(control)
+    jobs = sort(control)
+    for job in range(lt.size(jobs)):
+        arbol_fechas = model.add_fecha(control,lt.getElement(jobs,job))
+        arbol_salarios = model.add_salario(control,lt.getElement(jobs,job))
+    return jobs,skills,multilocations, employments,arbol_fechas, arbol_salarios
 
+def loadjobs(control):
+    global muestra
+    booksfile = cf.data_dir + muestra+"-jobs.csv"
+    input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
+    for job in input_file:
+        model.add_job(control, job)
+        
+        
+def loadskills(control):
+    booksfile = cf.data_dir + muestra + "-skills.csv"
+    input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
+    for skill in input_file:
+        model.add_skills(control, skill)
+        
+def loadMulti(control):
+    global muestra
+    booksfile = cf.data_dir + muestra+"-multilocations.csv"
+    input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
+    for multi in input_file:
+        model.add_multi(control, multi)
+        
+def loadEmployment(control):
+    global muestra
+    booksfile = cf.data_dir + muestra+"-employments_types.csv"
+    input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
+    for employ in input_file:
+        model.add_employ(control, employ)
 
 # Funciones de ordenamiento
-
+def data_size(data):
+    size=model.data_size(data)
+    return(size)
+def data_sizem(data):
+    size=model.data_sizem(data)
+    return(size)
 def sort(control):
     """
     Ordena los datos del modelo
     """
     #TODO: Llamar la función del modelo para ordenar los datos
-    pass
+    starttime=get_time()
+    control=model.sort(control["jobs"])
+    endtime=get_time()
+    delta=delta_time(starttime,endtime)
+    return(control)
 
 
 # Funciones de consulta sobre el catálogo
