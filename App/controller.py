@@ -26,6 +26,7 @@ import time
 import csv
 import tracemalloc
 from DISClib.ADT import list as lt
+from datetime import datetime
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
@@ -56,12 +57,16 @@ def load_data(control):
     skills = loadskills(control)
     multilocations = loadMulti(control)
     employments = loadEmployment(control)
-    jobs = model.add_infojob(control)
+    
+    model.add_infojob(control)
+    #print(control['jobs']['elements'])
     jobs = sort(control)
-    for job in range(lt.size(jobs)):
-        arbol_fechas = model.add_fecha(control,lt.getElement(jobs,job))
-        arbol_salarios = model.add_salario(control,lt.getElement(jobs,job))
-    return jobs,skills,multilocations, employments,arbol_fechas, arbol_salarios
+    #print(control['jobs']['elements'][8])
+    #for job in range(lt.size(control['jobs'])):
+        
+        #arbol_fechas = model.add_fecha(control,lt.getElement(jobs,job))
+        #arbol_salarios = model.add_salario(control,lt.getElement(jobs,job))
+    return jobs,skills,multilocations, employments
 
 def loadjobs(control):
     global muestra
@@ -69,6 +74,7 @@ def loadjobs(control):
     input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
     for job in input_file:
         model.add_job(control, job)
+    #return control
         
         
 def loadskills(control):
@@ -76,6 +82,7 @@ def loadskills(control):
     input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
     for skill in input_file:
         model.add_skills(control, skill)
+    #return control
         
 def loadMulti(control):
     global muestra
@@ -83,6 +90,7 @@ def loadMulti(control):
     input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
     for multi in input_file:
         model.add_multi(control, multi)
+    #return control
         
 def loadEmployment(control):
     global muestra
@@ -90,6 +98,7 @@ def loadEmployment(control):
     input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
     for employ in input_file:
         model.add_employ(control, employ)
+    #return control
 
 # Funciones de ordenamiento
 def data_size(data):
@@ -107,7 +116,7 @@ def sort(control):
     control=model.sort(control["jobs"])
     endtime=get_time()
     delta=delta_time(starttime,endtime)
-    return(control)
+    return control
 
 
 # Funciones de consulta sobre el catálogo
@@ -119,13 +128,20 @@ def get_data(control, id):
     #TODO: Llamar la función del modelo para obtener un dato
     pass
 
+def printfulltab(csv):
+    jobs=model.printfulltab(csv)
+    return(jobs)
 
-def req_1(control):
+def printlasttab(csv,num):
+    jobs=model.printlasttab(csv,num)
+    return(jobs)
+
+def req_1(control,fechaini,fechafin):
     """
     Retorna el resultado del requerimiento 1
     """
     # TODO: Modificar el requerimiento 1
-    pass
+    return model.req_1(control,fechaini,fechafin)
 
 
 def req_2(control):
@@ -151,7 +167,10 @@ def req_4(control):
     # TODO: Modificar el requerimiento 4
     pass
 
-
+def newtime(fecha):
+    date_format="%Y-%m-%d"
+    fecha = (datetime.strptime(fecha, date_format)).date()
+    return fecha
 def req_5(control):
     """
     Retorna el resultado del requerimiento 5

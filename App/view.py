@@ -68,8 +68,8 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    jobs_loaded, employments_loaded, multilocations_loaded, skills_loaded, arbol_salario, arbol_fecha=controller.load_data(control)
-    return jobs_loaded, employments_loaded, multilocations_loaded, skills_loaded,arbol_salario, arbol_fecha
+    jobs_loaded, employments_loaded, multilocations_loaded, skills_loaded=controller.load_data(control)
+    return jobs_loaded, employments_loaded, multilocations_loaded, skills_loaded
 
 
 
@@ -80,12 +80,13 @@ def print_data(control, id):
     #TODO: Realizar la función para imprimir un elemento
     pass
 
-def print_req_1(control):
+def print_req_1(control,fechaini,fechafin):
     """
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    pass
+    result = controller.req_1(control,fechaini,fechafin)
+    return result
 
 
 def print_req_2(control):
@@ -169,8 +170,10 @@ if __name__ == "__main__":
             print("skills cargados: "+ str(controller.data_sizem(control["skills"])))
             print(controller.printjobtab(control["jobs"]))
         elif int(inputs) == 2:
-            print_req_1(control)
-
+            fechaini = controller.newtime(input("Fecha minima(AAAA-MM-DD): "))
+            fechafin = controller.newtime(input("Fecha maxima(AAAA-MM-DD): "))
+            result = print_req_1(control,fechaini,fechafin)
+            print(controller.printfulltab(result))
         elif int(inputs) == 3:
             print_req_2(control)
 

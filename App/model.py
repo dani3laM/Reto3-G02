@@ -76,6 +76,8 @@ def comparesalary(date1, date2):
     """
     Compara dos fechas
     """
+    date1 = int(date1)
+    date2 = int(date2)
     if (date1 == date2):
         return 0
     elif (date1 > date2):
@@ -86,6 +88,9 @@ def compareDates(date1, date2):
     """
     Compara dos fechas
     """
+    date_format="%Y-%m-%dT%H:%M:%S.%fZ"
+    #datetime.strptime(date1, date_format)
+    #datetime.strptime(date2, date_format)
     if (date1 == date2):
         return 0
     elif (date1 > date2):
@@ -112,12 +117,23 @@ def add_job(catalog, job):
     Función para agregar nuevos elementos a la lista
     """
     #TODO: Crear la función para agregar elementos a una lista
-    job['skills'] = lt.newList('SINGLE_LINKED', comp_by_id)
-    job['salario']= None
-    job['ubicaciones'] = lt.newList('SINGLE_LINKED', comp_by_id)
+    job['skills'] = lt.newList('ARRAY_LIST', comp_by_id)
+    job['salario']= 0
+    job['ubicaciones'] = lt.newList('ARRAY_LIST', comp_by_id)
     job = time(job)
     lt.addLast(catalog['jobs'], job)
-    return catalog
+    hay = om.get(catalog['fechas'],job['published_at'])
+    if hay is None:
+        entry = lt.newList('SINGLE_LINKED', comp_by_id)
+        lt.addLast(entry, job['id'])
+        om.put(catalog['fechas'], job['published_at'], entry)
+    else:
+        entry = me.getValue(hay)
+        lt.addLast(entry,job['id'])
+        me.setValue(hay,entry)
+        
+        
+    return catalog['jobs']
 
 
 # Funciones para creacion de datos
@@ -136,31 +152,7 @@ def time(job):
     job['published_at'] = new_date
     
     return job
-def add_fecha(catalog,job):
-    fecha = job['published_at']
-    if fecha is not None:
-        hay = om.get(catalog['fechas'],fecha)
-        if hay is None:
-            lista = lt.newList('ARRAY_LIST', comp_by_id)
-            lt.addLast(lista,job)
-            om.put(catalog['fechas'],fecha,lista)
-        else:
-            lista = me.getValue(hay)
-            lt.addLast(lista,job)
-    return catalog
 
-def add_salario(catalog,job):
-    salario = job['salario']
-    if salario is not None:
-        hay = om.get(catalog['salarios'],salario)
-        if hay is None:
-            lista = lt.newList('ARRAY_LIST', comp_by_id)
-            lt.addLast(lista,job)
-            om.put(catalog['salarios'],salario,lista)
-        else:
-            lista = me.getValue(hay)
-            lt.addLast(lista,job) 
-    return catalog  
 
 def add_skills(catalog,skill):
     """
@@ -177,7 +169,7 @@ def add_skills(catalog,skill):
     else:
         lista = me.getValue(hay)
         lt.addLast(lista,skill['name'])
-    return catalog
+    return catalog['skills']
 
 def add_multi(catalog,multi):
     id = multi['id']
@@ -194,12 +186,20 @@ def add_multi(catalog,multi):
 def add_employ(catalog,employ):
     id = employ['id']
     hay = mp.get(catalog['employments'],id)
-    if hay is None:
-        mp.put(catalog['employments'], id, employ['salary_from'])
+    if employ['salary_from'] == '':
+        employ['salary_from'] = 0
+        salario = employ['salary_from']
     else:
-        lista = me.getValue(hay)
-        lt.addLast(lista,employ['salary_from'])  
-    return catalog 
+        salario = int(employ['salary_from'])
+    if hay is None:
+        mp.put(catalog['employments'], id, salario)
+    haysal = om.get(catalog['salarios'],salario)
+    if haysal is None:
+        entry = employ['id']
+        om.put(catalog['salarios'], employ['salary_from'], entry)
+    else:
+        me.setValue(haysal,id)
+    return catalog['employments']
 
 def add_infojob(catalog):
     for i in range(lt.size(catalog['jobs'])):
@@ -210,14 +210,15 @@ def add_infojob(catalog):
         employ = mp.get(catalog['employments'],ids)
         if skill is not None:
             newskill = me.getValue(skill)
-            lt.addLast[job['skills'],newskill]
+            lt.addLast(job['skills'],newskill['elements'])
         if multi is not None:
             newlocation = me.getValue(multi)
-            lt.addLast[job['ubicaciones'],newlocation]
-        if employ is not None:
+            lt.addLast(job['ubicaciones'],newlocation['elements'])
+        if  employ != None:
             newvalor = me.getValue(employ)
-            job['pago'] = newvalor    
-    return job
+            if newvalor != '' and newvalor != ' ':
+                job['salario'] = newvalor    
+    return catalog
             
 def printjobtab(csv):
     jobs=csv
@@ -228,7 +229,8 @@ def printjobtab(csv):
                 "company_name": jobs["elements"][i]["company_name"],
                 "experience_level": jobs["elements"][i]["experience_level"],
                 "country_code": jobs["elements"][i]["country_code"],
-                "city": jobs["elements"][i]["city"]}
+                "city": jobs["elements"][i]["city"],
+                'skills':jobs['elements'][i]['skills']['elements']}
         lt.addLast(diccionario,diccio)
     global canti
     jobsfal=[]
@@ -244,6 +246,32 @@ def printjobtab(csv):
     tab=(tabulate(jobsfal,headers=headers,tablefmt="pretty"))
     return(tab)
 canti=6
+
+def printlasttab(csv,num):
+    if num>lt.size(csv):
+        num=lt.size(csv)
+    jobsfal=[]
+    last= lt.subList(csv,int(lt.size(csv)-(num-1)),(num))
+    jobs=csv
+    jobsfirst=lt.firstElement(jobs)
+    headers= list(jobsfirst.keys())
+    headers.remove("id")
+    for elements in lt.iterator(last):
+        del elements["id"]
+        jobsfal.append(elements.values())
+    tab=(tabulate(jobsfal,headers=headers,tablefmt="pretty"))
+    return(tab)
+def printfulltab(csv):
+    jobsfal=[]
+    jobs=csv
+    jobsfirst=lt.firstElement(jobs)
+    headers= list(jobsfirst.keys())
+    headers.remove("id")
+    for elements in lt.iterator(csv):
+        del elements["id"]
+        jobsfal.append(elements.values())
+    tab=(tabulate(jobsfal,headers=headers,tablefmt="pretty"))
+    return(tab)
 
 def cantidad_datos(cant):
     global canti
@@ -267,12 +295,25 @@ def data_sizem(data):
     size= mp.size(data)
     return(size)
 
-def req_1(data_structs):
+def req_1(data_structs,fechaini,fechafin):
     """
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
-    pass
+    lista = om.values(data_structs['fechas'],fechaini,fechafin)
+    final = lt.newList(datastructure="ARRAY_LIST",cmpfunction=cmp_by_id)
+    for i in range(lt.size(lista)):
+        jobs = lt.getElement(lista,i)
+        for c in range(lt.size(jobs)):
+            id = lt.getElement(jobs,c)
+            for b in range(lt.size(data_structs['jobs'])):
+                job = lt.getElement(data_structs['jobs'],b)
+                if id == job['id']:
+                    lt.addLast(final,job)
+    return final
+                    
+        
+        
 
 
 def req_2(data_structs):
