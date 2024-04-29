@@ -31,7 +31,9 @@ from DISClib.DataStructures import mapentry as me
 assert cf
 from tabulate import tabulate
 import traceback
-
+import sys
+default_limit = 1000
+sys.setrecursionlimit(default_limit*10)
 """
 La vista se encarga de la interacción con el usuario
 Presenta el menu de opciones y por cada seleccion
@@ -89,20 +91,22 @@ def print_req_1(control,fechaini,fechafin):
     return result
 
 
-def print_req_2(control):
+def print_req_2(control,pais,nivel):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
-    pass
+    result = controller.req_2(control,pais,nivel)
+    return result
 
 
-def print_req_3(control):
+def print_req_3(control,pais,nivel):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 3
-    pass
+    result = controller.req_3(control,pais,nivel)
+    return result
 
 
 def print_req_4(control):
@@ -169,16 +173,31 @@ if __name__ == "__main__":
             print("multilocatiosn cargados: "+ str(controller.data_sizem(control["multilocations"])))
             print("skills cargados: "+ str(controller.data_sizem(control["skills"])))
             print(controller.printjobtab(control["jobs"]))
+            #print(lt.subList(control['jobs'],1,5))
         elif int(inputs) == 2:
             fechaini = controller.newtime(input("Fecha minima(AAAA-MM-DD): "))
             fechafin = controller.newtime(input("Fecha maxima(AAAA-MM-DD): "))
             result = print_req_1(control,fechaini,fechafin)
-            print(controller.printfulltab(result))
+            num = lt.size(result)
+            print(lt.size(result))
+            #print(lt.subList(result,1,5))
+            print(controller.printlasttab(result,num))
         elif int(inputs) == 3:
-            print_req_2(control)
-
+            pais = input('ingrese el pais de las ofertas a buscar: ')
+            nivel = input('ingrese el nivel de las ofertas a buscar: ')
+            result1 = (print_req_2(control,pais,nivel))
+            num = 5
+            print(lt.size(result1))
+            print(lt.subList(result1,1,5))
+            print(controller.printlasttab(result1,num))
         elif int(inputs) == 4:
-            print_req_3(control)
+            pais = input('ingrese el pais de las ofertas a buscar: ')
+            nivel = input('ingrese el nivel de las ofertas a buscar: ')
+            result1 = (print_req_3(control,pais,nivel))
+            num = 5
+            print(lt.size(result1))
+            print(lt.subList(result1,1,5))
+            print(controller.printlasttab(result1,num))
 
         elif int(inputs) == 5:
             print_req_4(control)

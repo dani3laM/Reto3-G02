@@ -27,10 +27,11 @@ import csv
 import tracemalloc
 from DISClib.ADT import list as lt
 from datetime import datetime
+from DISClib.ADT import orderedmap as om
 """
 El controlador se encarga de mediar entre la vista y el modelo.
 """
-muestra="10-por"
+muestra="20-por"
 
 def new_controller():
     """
@@ -47,6 +48,8 @@ def cantidad_datos(cant):
 def printjobtab(csv):
     jobs=model.printjobtab(csv)
     return(jobs)
+def imprimir_ofertas(ofertas):
+    model.imprimir_ofertas(ofertas)
 
 def load_data(control):
     """
@@ -55,17 +58,20 @@ def load_data(control):
     # TODO: Realizar la carga de datos
     jobs = loadjobs(control)
     skills = loadskills(control)
+    #print(control['skills'])
     multilocations = loadMulti(control)
     employments = loadEmployment(control)
     
-    model.add_infojob(control)
-    #print(control['jobs']['elements'])
-    jobs = sort(control)
-    #print(control['jobs']['elements'][8])
+    
+    #jobs = sort(control)
+    #print(om.keys(control['salarios'],200,700))
+    #model.add_infojob(control)
+    #print(lt.firstElement(control['jobs']))
     #for job in range(lt.size(control['jobs'])):
         
         #arbol_fechas = model.add_fecha(control,lt.getElement(jobs,job))
         #arbol_salarios = model.add_salario(control,lt.getElement(jobs,job))
+        
     return jobs,skills,multilocations, employments
 
 def loadjobs(control):
@@ -78,6 +84,7 @@ def loadjobs(control):
         
         
 def loadskills(control):
+    global muestra
     booksfile = cf.data_dir + muestra + "-skills.csv"
     input_file = csv.DictReader(open(booksfile, encoding='utf-8'),delimiter=";")
     for skill in input_file:
@@ -144,7 +151,7 @@ def req_1(control,fechaini,fechafin):
     return model.req_1(control,fechaini,fechafin)
 
 
-def req_2(control):
+def req_2(control,pais,nivel):
     """
     Retorna el resultado del requerimiento 2
     """
@@ -152,12 +159,12 @@ def req_2(control):
     pass
 
 
-def req_3(control):
+def req_3(control,pais,nivel):
     """
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
-    pass
+    return model.req_3(control,pais,nivel)
 
 
 def req_4(control):
@@ -169,7 +176,7 @@ def req_4(control):
 
 def newtime(fecha):
     date_format="%Y-%m-%d"
-    fecha = (datetime.strptime(fecha, date_format)).date()
+    fecha = (datetime.strptime(fecha, date_format))
     return fecha
 def req_5(control):
     """
@@ -239,3 +246,5 @@ def delta_memory(stop_memory, start_memory):
     # de Byte -> kByte
     delta_memory = delta_memory/1024.0
     return delta_memory
+
+csv.field_size_limit(2147483647)
